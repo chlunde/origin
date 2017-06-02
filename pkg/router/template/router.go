@@ -824,9 +824,27 @@ func (r *templateRouter) AddEndpoints(id string, endpoints []Endpoint) {
 		return
 	}
 
+	endpointChanged := make(map[Endpoint]bool)
+	for _, ep := range frontend.EndpointTable {
+		endpointChanged[ep] = true
+	}
+	for _, ep := range endpoints {
+		endpointChanged[ep] = false
+	}
+
+	for ep, changed := range endpointChanged {
+		if changed {
+			if !ep.Draining {
+				ep.Draining = true
+				glog.Infof("Marking pod as draining: %#v", ep)
+			}
+			endpoints = append(endpoints, ep)
+		}
+	}
+
 	frontend.EndpointTable = endpoints
 	r.serviceUnits[id] = frontend
-
+	glog.Infof("frontend: %#v", frontend)
 	if id == r.peerEndpointsKey {
 		r.peerEndpoints = frontend.EndpointTable
 		glog.V(4).Infof("Peer endpoints updated to: %#v", r.peerEndpoints)

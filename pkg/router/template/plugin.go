@@ -170,7 +170,6 @@ func (p *TemplatePlugin) HandleEndpoints(eventType watch.EventType, endpoints *k
 	case watch.Added, watch.Modified:
 		glog.V(4).Infof("Modifying endpoints for %s", key)
 		routerEndpoints := createRouterEndpoints(endpoints, !p.IncludeUDP, p.ServiceFetcher)
-		key := endpointsKey(endpoints)
 		p.Router.AddEndpoints(key, routerEndpoints)
 	case watch.Deleted:
 		glog.V(4).Infof("Deleting endpoints for %s", key)
